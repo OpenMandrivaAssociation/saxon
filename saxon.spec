@@ -34,7 +34,7 @@
 Summary:        Java XSLT processor
 Name:           saxon
 Version:        6.5.5
-Release:        %mkrel 1.2.1
+Release:        %mkrel 1.2.2
 Epoch:          0
 License:        MPL
 Group:          Development/Java
@@ -44,10 +44,10 @@ Source1:        %{name}.saxon.script
 Source2:        %{name}.build.script
 Source3:        %{name}.1
 BuildRequires:  jpackage-utils >= 0:1.6
-BuildRequires:  xml-commons-apis
+BuildRequires:  xml-commons-jaxp-1.3-apis
 BuildRequires:  jdom >= 0:1.0
 BuildRequires:  ant
-Requires:       xml-commons-apis
+Requires:       xml-commons-jaxp-1.3-apis
 Requires:       jpackage-utils >= 0:1.6
 Requires:       jdom >= 0:1.0
 Requires:       jaxp_parser_impl
@@ -84,7 +84,7 @@ stylesheets, by writing Java applications, or by any combination of the two.
 %package        aelfred
 Summary:        Java XML parser
 Group:          Development/Java
-Requires:       xml-commons-apis
+Requires:       xml-commons-jaxp-1.3-apis
 
 %description    aelfred
 A slightly improved version of the AElfred Java XML parser from Microstar.
@@ -142,7 +142,7 @@ Utility scripts for %{name}.
 %{__rm} -r *.jar
 
 %build
-export CLASSPATH=%(build-classpath xml-commons-apis jdom)
+export CLASSPATH=%(build-classpath xml-commons-jaxp-1.3-apis jdom)
 export OPT_JAR_LIST=:
 %{ant} \
   -Dj2se.javadoc=%{_javadocdir}/java \
