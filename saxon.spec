@@ -142,7 +142,7 @@ Utility scripts for %{name}.
 %{__rm} -r *.jar
 
 %build
-export CLASSPATH=%(build-classpath xml-commons-jaxp-1.3-apis jdom)
+export CLASSPATH=$(build-classpath xml-commons-jaxp-1.3-apis jdom)
 export OPT_JAR_LIST=:
 %{ant} \
   -Dj2se.javadoc=%{_javadocdir}/java \
