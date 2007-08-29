@@ -51,7 +51,7 @@ Requires:       xml-commons-jaxp-1.3-apis
 Requires:       jpackage-utils >= 0:1.6
 Requires:       jdom >= 0:1.0
 Requires:       jaxp_parser_impl
-Requires:       /usr/sbin/update-alternatives
+Requires:       update-alternatives
 Provides:       jaxp_transform_impl
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
