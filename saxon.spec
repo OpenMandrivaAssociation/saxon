@@ -34,7 +34,7 @@
 Summary:        Java XSLT processor
 Name:           saxon
 Version:        6.5.5
-Release:        %mkrel 1.2.2
+Release:        %mkrel 1.2.3
 Epoch:          0
 License:        MPL
 Group:          Development/Java
@@ -55,8 +55,6 @@ Requires:       update-alternatives
 Provides:       jaxp_transform_impl
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
-Requires(post): java-gcj-compat
-Requires(postun): java-gcj-compat
 %else
 BuildArch:      noarch
 BuildRequires:  java-devel >= 0:1.4.2
