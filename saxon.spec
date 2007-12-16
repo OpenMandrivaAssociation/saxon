@@ -34,7 +34,7 @@
 Summary:        Java XSLT processor
 Name:           saxon
 Version:        6.5.5
-Release:        %mkrel 1.2.3
+Release:        %mkrel 1.2.4
 Epoch:          0
 License:        MPL
 Group:          Development/Java
@@ -43,7 +43,7 @@ Source0:        http://download.sf.net/saxon/saxon6-5-5.zip
 Source1:        %{name}.saxon.script
 Source2:        %{name}.build.script
 Source3:        %{name}.1
-BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  java-rpmbuild >= 0:1.6
 BuildRequires:  xml-commons-jaxp-1.3-apis
 BuildRequires:  jdom >= 0:1.0
 BuildRequires:  ant
