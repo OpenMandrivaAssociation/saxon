@@ -34,7 +34,7 @@
 Summary:        Java XSLT processor
 Name:           saxon
 Version:        6.5.5
-Release:        %mkrel 1.2.4
+Release:        %mkrel 1.2.5
 Epoch:          0
 License:        MPL
 Group:          Development/Java
@@ -130,13 +130,16 @@ Requires:       %{name} = %{epoch}:%{version}-%{release}
 %description    scripts
 Utility scripts for %{name}.
 
-
 %prep
 %setup -q -c
 %{_bindir}/unzip -q source.zip
 %{__cp} -a %{SOURCE2} ./build.xml
 # cleanup unnecessary stuff we'll build ourselves
-%{__rm} -r *.jar
+%{__rm} -v *.jar
+# fix newlines in docs
+for i in doc/*.html; do
+    %{__perl} -pi -e 's/\r$//g' $i
+done
 
 %build
 export CLASSPATH=$(build-classpath xml-commons-jaxp-1.3-apis jdom)
@@ -178,14 +181,11 @@ export OPT_JAR_LIST=:
 %{__sed} 's,__RESOLVERDIR__,%{resolverdir},' < %{SOURCE3} \
   > %{buildroot}%{_mandir}/man1/%{name}.1
 
+%if 0
 # jaxp_transform_impl ghost symlink
 %{__ln_s} %{_sysconfdir}/alternatives \
   %{buildroot}%{_javadir}/jaxp_transform_impl.jar
-
-# fix newlines in docs
-for i in doc/*.html; do
-    %{__perl} -pi -e 's/\r$//g' $i
-done
+%endif
 
 %if %{gcj_support}
 %{_bindir}/aot-compile-rpm
@@ -208,7 +208,9 @@ done
 %defattr(0644,root,root,0755)
 %{_javadir}/%{name}.jar
 %{_javadir}/%{name}-%{version}.jar
+%if 0
 %ghost %{_javadir}/jaxp_transform_impl.jar
+%endif
 %if %{gcj_support}
 %dir %{_libdir}/gcj/%{name}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/java.db
