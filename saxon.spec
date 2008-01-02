@@ -59,6 +59,7 @@ BuildRequires:  java-gcj-compat-devel
 BuildArch:      noarch
 BuildRequires:  java-devel >= 0:1.4.2
 %endif
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 The SAXON package is a collection of tools for processing XML documents.
