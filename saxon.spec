@@ -34,7 +34,7 @@
 Summary:        Java XSLT processor
 Name:           saxon
 Version:        6.5.5
-Release:        %mkrel 1.2.5
+Release:        %mkrel 1.2.6
 Epoch:          0
 License:        MPL
 Group:          Development/Java
