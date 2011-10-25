@@ -28,64 +28,56 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define resolverdir %{_sysconfdir}/java/resolver
-%define gcj_support 1
-
-Summary:        Java XSLT processor
+Summary:        Java XPath, XSLT 2.0 and XQuery implementation
 Name:           saxon
-Version:        6.5.5
-Release:        %mkrel 1.2.6
-Epoch:          0
-License:        MPL
+Version:        9.2.0.3
+Release:        2
+# net.sf.saxon.om.XMLChar is from ASL-licensed Xerces
+License:        MPLv1.0 and ASL 1.1
 Group:          Development/Java
 URL:            http://saxon.sourceforge.net/
-Source0:        http://download.sf.net/saxon/saxon6-5-5.zip
+Source0:        http://dl.sourceforge.net/project/saxon/Saxon-HE/9.2/saxon-resources9-2-0-2.zip
 Source1:        %{name}.saxon.script
-Source2:        %{name}.build.script
-Source3:        %{name}.1
-BuildRequires:  java-rpmbuild >= 0:1.6
-BuildRequires:  xml-commons-jaxp-1.3-apis
-BuildRequires:  jdom >= 0:1.0
+Source2:        %{name}.saxonq.script
+Source3:        %{name}.build.script
+Source4:        %{name}.1
+Source5:        %{name}q.1
+# There's no 9.2.0.3 resource bundle, we patch 9.2.0.2 with difference against 9.2.0.3 source bundle
+Patch0:         saxon-9.2.0.2-9.2.0.3.patch
+BuildRequires:  unzip
 BuildRequires:  ant
-Requires:       xml-commons-jaxp-1.3-apis
-Requires:       jpackage-utils >= 0:1.6
-Requires:       jdom >= 0:1.0
+BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  bea-stax-api
+BuildRequires:  xml-commons-apis
+BuildRequires:  xom
+BuildRequires:  jdom >= 0:1.0-0.b7
+BuildRequires:  java-javadoc
+BuildRequires:  jdom-javadoc >= 0:1.0-0.b9.3jpp
+BuildRequires:  dom4j
+Requires:       jpackage-utils
+Requires:       bea-stax-api
+Requires:       bea-stax
 Requires:       jaxp_parser_impl
-Requires:       update-alternatives
-Provides:       jaxp_transform_impl
-%if %{gcj_support}
-BuildRequires:  java-gcj-compat-devel
-%else
+Requires:       /usr/sbin/update-alternatives
+Provides:       jaxp_transform_impl = %{version}-%{release}
+
+# Older versions were split into multile packages
+Obsoletes:	%{name}-xpath < %{version}-%{release}
+Obsoletes:	%{name}-xom < %{version}-%{release}
+Obsoletes:	%{name}-sql < %{version}-%{release}
+Obsoletes:	%{name}-jdom < %{version}-%{release}
+Obsoletes:	%{name}-dom < %{version}-%{release}
+
 BuildArch:      noarch
-BuildRequires:  java-devel >= 0:1.4.2
-%endif
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
-The SAXON package is a collection of tools for processing XML documents.
-The main components are:
-- An XSLT processor, which implements the Version 1.0 XSLT and XPath
-  Recommendations from the World Wide Web Consortium, found at
-  http://www.w3.org/TR/1999/REC-xslt-19991116 and
-  http://www.w3.org/TR/1999/REC-xpath-19991116 with a number of powerful
-  extensions. This version of Saxon also includes many of the new features
-  defined in the XSLT 1.1 working draft, but for conformance and portability
-  reasons these are not available if the stylesheet header specifies
-  version="1.0".
-- A Java library, which supports a similar processing model to XSL, but allows
-  full programming capability, which you need if you want to perform complex
-  processing of the data or to access external services such as a relational
-  database.
-So you can use SAXON with any SAX-compliant XML parser by writing XSLT
-stylesheets, by writing Java applications, or by any combination of the two.
+Saxon HE is Saxonica's non-schema-aware implementation of the XPath 2.0,
+XSLT 2.0, and XQuery 1.0 specifications aligned with the W3C Candidate
+Recommendation published on 3 November 2005. It is a complete and
+conformant implementation, providing all the mandatory features of
+those specifications and nearly all the optional features. 
 
-%package        aelfred
-Summary:        Java XML parser
-Group:          Development/Java
-Requires:       xml-commons-jaxp-1.3-apis
-
-%description    aelfred
-A slightly improved version of the AElfred Java XML parser from Microstar.
 
 %package        manual
 Summary:        Manual for %{name}
@@ -97,10 +89,6 @@ Manual for %{name}.
 %package        javadoc
 Summary:        Javadoc for %{name}
 Group:          Development/Java
-BuildRequires:  java-javadoc
-BuildRequires:  jdom-javadoc >= 0:1.0
-Requires:       java-javadoc
-Requires:       jdom-javadoc >= 0:1.0
 
 %description    javadoc
 Javadoc for %{name}.
@@ -108,147 +96,123 @@ Javadoc for %{name}.
 %package        demo
 Summary:        Demos for %{name}
 Group:          Development/Java
-Requires:       %{name} = %{epoch}:%{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description    demo
 Demonstrations and samples for %{name}.
 
-%package        jdom
-Summary:        JDOM support for %{name}
-Group:          Development/Java
-Requires:       %{name} = %{epoch}:%{version}-%{release}
-Requires:       jdom >= 0:1.0
-
-%description    jdom
-JDOM support for %{name}.
-
 %package        scripts
 Summary:        Utility scripts for %{name}
 Group:          Development/Java
-Requires:       jpackage-utils >= 0:1.6
-Requires:       %{name} = %{epoch}:%{version}-%{release}
+Requires:       jpackage-utils >= 0:1.5
+Requires:       %{name} = %{version}-%{release}
 
 %description    scripts
 Utility scripts for %{name}.
 
+
 %prep
 %setup -q -c
-%{_bindir}/unzip -q source.zip
-%{__cp} -a %{SOURCE2} ./build.xml
+unzip -q source.zip -d src
+cd src
+%patch0 -p1 -b .9.2.0.3
+cd ..
+
+cp -p %{SOURCE3} ./build.xml
+
+# deadNET
+rm -rf src/net/sf/saxon/dotnet
+
+# Depends on XQJ (javax.xml.xquery)
+rm -rf src/net/sf/saxon/xqj
+
+# This requires a EE edition feature (com.saxonica.xsltextn)
+rm -rf src/net/sf/saxon/option/sql/SQLElementFactory.java
+
 # cleanup unnecessary stuff we'll build ourselves
-%{__rm} -v *.jar
-# fix newlines in docs
-for i in doc/*.html; do
-    %{__perl} -pi -e 's/\r$//g' $i
-done
+rm -rf docs/api
+find . \( -name "*.jar" -name "*.pyc" \) -delete
+
 
 %build
-export CLASSPATH=$(build-classpath xml-commons-jaxp-1.3-apis jdom)
-export OPT_JAR_LIST=:
-%{ant} \
+mkdir -p build/classes
+cat >build/classes/edition.properties <<EOF
+config=net.sf.saxon.Configuration
+platform=net.sf.saxon.java.JavaPlatform
+EOF
+
+export CLASSPATH=%(build-classpath xml-commons-apis jdom xom bea-stax-api dom4j)
+ant \
   -Dj2se.javadoc=%{_javadocdir}/java \
   -Djdom.javadoc=%{_javadocdir}/jdom
 
+
 %install
-%{__rm} -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 # jars
-%{__mkdir_p} %{buildroot}%{_javadir}
-%{__cp} -a build/lib/%{name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-
-%{__cp} -a build/lib/%{name}-aelfred.jar \
-    %{buildroot}%{_javadir}/%{name}-aelfred-%{version}.jar
-
-%{__cp} -a build/lib/%{name}-jdom.jar \
-    %{buildroot}%{_javadir}/%{name}-jdom-%{version}.jar
-
-(cd %{buildroot}%{_javadir} && for jar in *-%{version}*; do \
-    %{__ln_s} ${jar} `echo $jar | %{__sed} "s|-%{version}||g"`; done)
+mkdir -p $RPM_BUILD_ROOT%{_javadir}
+cp -p build/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
+ln -s %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 
 # javadoc
-%{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__cp} -a build/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
+mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -pr build/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 
 # demo
-%{__mkdir_p} %{buildroot}%{_datadir}/%{name}
-%{__cp} -a samples/* %{buildroot}%{_datadir}/%{name}
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/%{name}
+cp -pr samples/* $RPM_BUILD_ROOT%{_datadir}/%{name}
 
 # scripts
-%{__mkdir_p} %{buildroot}%{_bindir}
-%{__sed} 's,__RESOLVERDIR__,%{resolverdir},' < %{SOURCE1} \
-  > %{buildroot}%{_bindir}/%{name}
-%{__mkdir_p} %{buildroot}%{_mandir}/man1
-%{__sed} 's,__RESOLVERDIR__,%{resolverdir},' < %{SOURCE3} \
-  > %{buildroot}%{_mandir}/man1/%{name}.1
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+install -p -m755 %{SOURCE1} $RPM_BUILD_ROOT%{_bindir}/%{name}
+install -p -m755 %{SOURCE2} $RPM_BUILD_ROOT%{_bindir}/%{name}q
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
+install -p -m644 %{SOURCE4} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}.1
+install -p -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}q.1
 
-%if 0
 # jaxp_transform_impl ghost symlink
-%{__ln_s} %{_sysconfdir}/alternatives \
-  %{buildroot}%{_javadir}/jaxp_transform_impl.jar
-%endif
+ln -s %{_sysconfdir}/alternatives \
+  $RPM_BUILD_ROOT%{_javadir}/jaxp_transform_impl.jar
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
 
 %clean
-%{__rm} -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
+
 
 %post
-%{_sbindir}/update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
+update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
   jaxp_transform_impl %{_javadir}/%{name}.jar 25
 
 %preun
 {
   [ $1 -eq 0 ] || exit 0
-  %{_sbindir}/update-alternatives --remove jaxp_transform_impl %{_javadir}/%{name}.jar
+  update-alternatives --remove jaxp_transform_impl %{_javadir}/%{name}.jar
 } >/dev/null 2>&1 || :
 
 %files
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %{_javadir}/%{name}.jar
 %{_javadir}/%{name}-%{version}.jar
-%if 0
 %ghost %{_javadir}/jaxp_transform_impl.jar
-%endif
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/java.db
-%attr(-,root,root) %{_libdir}/gcj/%{name}/java.so
-%attr(-,root,root) %{_libdir}/gcj/%{name}/saxon-%{version}.jar.db
-%attr(-,root,root) %{_libdir}/gcj/%{name}/saxon-%{version}.jar.so
-%endif
-
-%files aelfred
-%defattr(0644,root,root,0755)
-%{_javadir}/%{name}-aelfred*
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/saxon-aelfred-%{version}.jar.db
-%attr(-,root,root) %{_libdir}/gcj/%{name}/saxon-aelfred-%{version}.jar.so
-%endif
-
-%files jdom
-%defattr(0644,root,root,0755)
-%{_javadir}/%{name}-jdom*
-%if %{gcj_support}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/saxon-jdom-%{version}.jar.db
-%attr(-,root,root) %{_libdir}/gcj/%{name}/saxon-jdom-%{version}.jar.so
-%endif
 
 %files manual
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc doc/*.html
 
 %files javadoc
-%defattr(0644,root,root,0755)
-%doc %{_javadocdir}/*
+%defattr(-,root,root,-)
+%doc %{_javadocdir}/%{name}-%{version}
 
 %files demo
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %{_datadir}/%{name}
 
 %files scripts
-%defattr(0755,root,root,0755)
+%defattr(-,root,root,-)
 %{_bindir}/%{name}
-%attr(0644,root,root) %{_mandir}/man1/%{name}.1*
+%{_bindir}/%{name}q
+%{_mandir}/man1/%{name}.1*
+%{_mandir}/man1/%{name}q.1*
+
+
