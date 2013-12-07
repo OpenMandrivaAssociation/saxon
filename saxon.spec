@@ -31,7 +31,7 @@
 Summary:        Java XPath, XSLT 2.0 and XQuery implementation
 Name:           saxon
 Version:        9.2.0.3
-Release:        6
+Release:        7
 # net.sf.saxon.om.XMLChar is from ASL-licensed Xerces
 License:        MPLv1.0 and ASL 1.1
 Group:          Development/Java
