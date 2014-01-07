@@ -1,3 +1,4 @@
+%{?_javapackages_macros:%_javapackages_macros}
 # Copyright (c) 2000-2005, JPackage Project
 # All rights reserved.
 #
@@ -30,21 +31,28 @@
 
 Summary:        Java XPath, XSLT 2.0 and XQuery implementation
 Name:           saxon
-Version:        9.2.0.3
-Release:        8
+Version:        9.3.0.4
+Release:        8.0%{?dist}
 # net.sf.saxon.om.XMLChar is from ASL-licensed Xerces
-License:        MPLv1.0 and ASL 1.1
-Group:          Development/Java
+# net/sf/saxon/option/jdom/ is MPLv1.1
+# net/sf/saxon/serialize/codenorm/ is UCD
+# net/sf/saxon/expr/sort/GenericSorter.java is MIT
+# net/sf/saxon/expr/Tokenizer.java and few other bits are BSD
+License:        MPLv1.0 and MPLv1.1 and ASL 1.1 and UCD and MIT
+
 URL:            http://saxon.sourceforge.net/
-Source0:        http://dl.sourceforge.net/project/saxon/Saxon-HE/9.2/saxon-resources9-2-0-2.zip
+Source0:        https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.3/saxon9-3-0-4source.zip
 Source1:        %{name}.saxon.script
 Source2:        %{name}.saxonq.script
 Source3:        %{name}.build.script
 Source4:        %{name}.1
 Source5:        %{name}q.1
-# There's no 9.2.0.3 resource bundle, we patch 9.2.0.2 with difference against 9.2.0.3 source bundle
-Patch0:         saxon-9.2.0.2-9.2.0.3.patch
+Source6:        https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.3/saxon-resources9-3.zip
+Source7:        http://irrational.googlecode.com/svn/trunk/maven-repo/net/sf/saxon/saxon-he/9.3.0.4/saxon-he-9.3.0.4.pom
+Source8:        http://www.mozilla.org/MPL/1.0/index.txt#/mpl-1.0.txt
+Source9:        http://www.mozilla.org/MPL/1.0/index.txt#/mpl-1.1.txt
 BuildRequires:  unzip
+BuildRequires:  java-devel >= 1:1.6.0
 BuildRequires:  ant
 BuildRequires:  jpackage-utils >= 0:1.6
 BuildRequires:  bea-stax-api
@@ -57,45 +65,43 @@ BuildRequires:  dom4j
 Requires:       jpackage-utils
 Requires:       bea-stax-api
 Requires:       bea-stax
-Requires:       jaxp_parser_impl
-Requires:       /usr/sbin/update-alternatives
+Requires:       chkconfig
 Provides:       jaxp_transform_impl = %{version}-%{release}
 
 # Older versions were split into multile packages
-Obsoletes:	%{name}-xpath < %{version}-%{release}
-Obsoletes:	%{name}-xom < %{version}-%{release}
-Obsoletes:	%{name}-sql < %{version}-%{release}
-Obsoletes:	%{name}-jdom < %{version}-%{release}
-Obsoletes:	%{name}-dom < %{version}-%{release}
+Obsoletes:  %{name}-xpath < %{version}-%{release}
+Obsoletes:  %{name}-xom < %{version}-%{release}
+Obsoletes:  %{name}-sql < %{version}-%{release}
+Obsoletes:  %{name}-jdom < %{version}-%{release}
+Obsoletes:  %{name}-dom < %{version}-%{release}
 
 BuildArch:      noarch
-BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
 Saxon HE is Saxonica's non-schema-aware implementation of the XPath 2.0,
 XSLT 2.0, and XQuery 1.0 specifications aligned with the W3C Candidate
 Recommendation published on 3 November 2005. It is a complete and
 conformant implementation, providing all the mandatory features of
-those specifications and nearly all the optional features. 
+those specifications and nearly all the optional features.
 
 
 %package        manual
 Summary:        Manual for %{name}
-Group:          Development/Java
+
 
 %description    manual
 Manual for %{name}.
 
 %package        javadoc
 Summary:        Javadoc for %{name}
-Group:          Development/Java
+
 
 %description    javadoc
 Javadoc for %{name}.
 
 %package        demo
 Summary:        Demos for %{name}
-Group:          Development/Java
+
 Requires:       %{name} = %{version}-%{release}
 
 %description    demo
@@ -103,7 +109,7 @@ Demonstrations and samples for %{name}.
 
 %package        scripts
 Summary:        Utility scripts for %{name}
-Group:          Development/Java
+
 Requires:       jpackage-utils >= 0:1.5
 Requires:       %{name} = %{version}-%{release}
 
@@ -113,26 +119,24 @@ Utility scripts for %{name}.
 
 %prep
 %setup -q -c
-unzip -q source.zip -d src
-cd src
-%patch0 -p1 -b .9.2.0.3
-cd ..
 
+unzip -q %{SOURCE6}
 cp -p %{SOURCE3} ./build.xml
 
 # deadNET
-rm -rf src/net/sf/saxon/dotnet
+rm -rf net/sf/saxon/dotnet
 
 # Depends on XQJ (javax.xml.xquery)
-rm -rf src/net/sf/saxon/xqj
+rm -rf net/sf/saxon/xqj
 
 # This requires a EE edition feature (com.saxonica.xsltextn)
-rm -rf src/net/sf/saxon/option/sql/SQLElementFactory.java
+rm -rf net/sf/saxon/option/sql/SQLElementFactory.java
 
 # cleanup unnecessary stuff we'll build ourselves
 rm -rf docs/api
 find . \( -name "*.jar" -name "*.pyc" \) -delete
 
+cp %{SOURCE8} %{SOURCE9} .
 
 %build
 mkdir -p build/classes
@@ -152,12 +156,11 @@ rm -rf $RPM_BUILD_ROOT
 
 # jars
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p build/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-ln -s %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
+cp -p build/lib/%{name}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 
 # javadoc
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr build/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+cp -pr build/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
 # demo
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/%{name}
@@ -175,10 +178,16 @@ install -p -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}q.1
 ln -s %{_sysconfdir}/alternatives \
   $RPM_BUILD_ROOT%{_javadir}/jaxp_transform_impl.jar
 
+# a simple POM
+install -dm 755 $RPM_BUILD_ROOT%{_mavenpomdir}
+install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
+sed -i -e 's/saxon-he/saxon/' $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
+%add_maven_depmap JPP-%{name}.pom %{name}.jar
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
+%pre javadoc
+# workaround for rpm bug, can be removed in F-18
+[ $1 -gt 1 ] && [ -L %{_javadocdir}/%{name} ] && \
+rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
 
 %post
 update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
@@ -192,17 +201,19 @@ update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
 
 %files
 %defattr(-,root,root,-)
+%doc mpl-1.0.txt mpl-1.1.txt
 %{_javadir}/%{name}.jar
-%{_javadir}/%{name}-%{version}.jar
+%{_mavenpomdir}/JPP-%{name}.pom
+%{_mavendepmapfragdir}/%{name}
 %ghost %{_javadir}/jaxp_transform_impl.jar
 
 %files manual
 %defattr(-,root,root,-)
-%doc doc/*.html
+%doc doc/*
 
 %files javadoc
 %defattr(-,root,root,-)
-%doc %{_javadocdir}/%{name}-%{version}
+%doc %{_javadocdir}/%{name}
 
 %files demo
 %defattr(-,root,root,-)
@@ -216,3 +227,103 @@ update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
 %{_mandir}/man1/%{name}q.1*
 
 
+%changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.3.0.4-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.3.0.4-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Thu Nov 15 2012 Stanislav Ochotnicky <sochotnicky@redhat.com> - 9.3.0.4-6
+- Fix license tag properly to include all pieces and add comments
+
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.3.0.4-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Wed Jul 11 2012 Andy Grimm <agrimm@gmail.com> - 9.3.0.4-4
+- Fix option syntax in scripts when using xml-commons-resolver (#831631)
+
+* Wed Feb 15 2012 Andy Grimm <agrimm@gmail.com> - 9.3.0.4-3
+- Fix FTBFS (#791033)
+- Add a simple POM file
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.3.0.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Thu Feb 17 2011 Alexander Kurtakov <akurtako@redhat.com> 9.3.0.4-1
+- Update to new upstream version.
+- Adapt to current guidelines.
+
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.2.0.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Tue Nov 03 2009 Lubomir Rintel <lkundrak@v3.sk> - 9.2.0.3-1
+- New package, based on saxon8
+
+* Tue Nov 03 2009 Lubomir Rintel <lkundrak@v3.sk> - 0:8.7-1
+- Tidied up for Fedora
+
+* Tue Mar 14 2006 Deepak Bhole <dbhole@redhat.com> - 0:B.8.7-1jpp
+- Changed package name for compatibility
+- Upgraded to 8.7
+- Added saxonq script for queries
+- Updated man pages
+
+* Mon Jan 30 2006 Ralph Apel <r.apel@r-apel.de> - 0:8.6.1-1jpp
+- Derive saxonb8 from saxon7
+
+* Mon Sep 05 2005 Ralph Apel <r.apel@r-apel.de> - 0:7.9.1-1jpp
+- Derive saxon7 from saxon
+- no more aelfred nor fop subpackages
+
+* Fri Sep 03 2004 Fernando Nasser <fnasser@redhat.com> - 0:6.5.3-3jpp
+- Rebuilt with Ant 1.6.2
+
+* Mon Jul 19 2004 Ville Skyttä <ville.skytta at iki.fi> - 0:6.5.3-2jpp
+- Apply two patches for known limitations from
+  http://saxon.sourceforge.net/saxon6.5.3/limitations.html
+- Make the command line script use xml-commons-resolver if it's available.
+- Include man page for command line script.
+- Add patch to fix command line option handling and document missing options.
+- New style versionless javadoc dir symlinking.
+- Crosslink with local J2SE javadocs.
+- Add missing jdom-javadoc build dependency.
+
+* Sun Aug 31 2003 Ville Skyttä <ville.skytta at iki.fi> - 0:6.5.3-1jpp
+- Update to 6.5.3.
+- Crosslink with local xml-commons-apis and fop javadocs.
+
+* Tue Jun  3 2003 Ville Skyttä <ville.skytta at iki.fi> - 0:6.5.2-7jpp
+- Non-versioned javadoc symlinking.
+- Include Main-Class attribute in saxon.jar.
+- Own (ghost) %%{_javadir}/jaxp_transform_impl.jar.
+- Remove alternatives in preun instead of postun.
+
+* Thu Apr 17 2003 Ville Skyttä <ville.skytta at iki.fi> - 6.5.2-6jpp
+- Rebuild for JPackage 1.5.
+- Split shell script to -scripts subpackage.
+- Use non-versioned jar in jaxp_transform_impl alternative, and don't remove
+  it on upgrade.
+- Spec file cleanups.
+
+* Thu Jul 25 2002 Ville Skyttä <ville.skytta at iki.fi> 6.5.2-5jpp
+- Fix shell script (again).
+- Rebuild with -Dbuild.compiler=modern (saxon-fop won't build with jikes).
+
+* Fri Jul 19 2002 Ville Skyttä <ville.skytta at iki.fi> 6.5.2-4jpp
+- First public JPackage release.
+- Compile with build.xml by yours truly.
+- AElfred no more provides jaxp_parser_impl; it's SAX only, no DOM.
+- Fix shell script.
+
+* Mon Jul  1 2002 Ville Skyttä <ville.skytta at iki.fi> 6.5.2-3jpp
+- Provides jaxp_parser_impl.
+- Requires xml-commons-apis.
+
+* Sun Jun 30 2002 Ville Skyttä <ville.skytta at iki.fi> 6.5.2-2jpp
+- Use sed instead of bash 2 extension when symlinking jars.
+- Provides jaxp_transform_impl.
+
+* Sat May 11 2002 Ville Skyttä <ville.skytta at iki.fi> 6.5.2-1jpp
+- First JPackage release.
+- Provides jaxp_parser2 though there's no DOM implementation in this AElfred.
