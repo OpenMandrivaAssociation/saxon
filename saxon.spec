@@ -49,8 +49,8 @@ Source4:        %{name}.1
 Source5:        %{name}q.1
 Source6:        https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.3/saxon-resources9-3.zip
 Source7:        http://irrational.googlecode.com/svn/trunk/maven-repo/net/sf/saxon/saxon-he/9.3.0.4/saxon-he-9.3.0.4.pom
-Source8:        http://www.mozilla.org/MPL/1.0/index.txt#/mpl-1.0.txt
-Source9:        http://www.mozilla.org/MPL/1.0/index.txt#/mpl-1.1.txt
+Source8:        http://www.mozilla.org/MPL/1.0/index.txt/mpl-1.0.txt
+Source9:        http://www.mozilla.org/MPL/1.0/index.txt/mpl-1.1.txt
 BuildRequires:  unzip
 BuildRequires:  java-devel >= 1:1.6.0
 BuildRequires:  ant
