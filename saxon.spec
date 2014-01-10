@@ -32,7 +32,7 @@
 Summary:        Java XPath, XSLT 2.0 and XQuery implementation
 Name:           saxon
 Version:        9.3.0.4
-Release:        8.0%{?dist}
+Release:        9.0%{?dist}
 # net.sf.saxon.om.XMLChar is from ASL-licensed Xerces
 # net/sf/saxon/option/jdom/ is MPLv1.1
 # net/sf/saxon/serialize/codenorm/ is UCD
@@ -182,7 +182,7 @@ ln -s %{_sysconfdir}/alternatives \
 install -dm 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 sed -i -e 's/saxon-he/saxon/' $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
+%add_maven_depmap -a net.sf.saxon:saxon::dom: JPP-%{name}.pom %{name}.jar
 
 %pre javadoc
 # workaround for rpm bug, can be removed in F-18
@@ -228,6 +228,9 @@ update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
 
 
 %changelog
+* Tue Oct 15 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 9.3.0.4-9
+- Add alias with 'dom' classifier
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.3.0.4-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
