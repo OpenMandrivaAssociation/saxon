@@ -1,7 +1,3 @@
 sources:
-  "saxon.1:"	105395349eb6604645eeeb2d436db7da65d8122c
-  "saxon.build.script:"	9dafbce2ee0f8a88c4cb16d78a1c0f69fd00c51f
-  "saxonq.1:"	703eac8be39fcdd86058a9052b0bf73c2c909336
-  "saxon-resources9-2-0-2.zip:"	711571b7cf267bc2064ac61b4eac03fd4d7356a5
-  "saxon.saxonq.script:"	93a31804c0531c91a43b011e8d1c57094d3337e6
-  "saxon.saxon.script:"	fac73f37dccb702f587e6480fcbf2a77fb3c3635
+  saxon9-3-0-4source.zip: 7c4884e4fc234faf622b8f3797ea74c49754afb0
+  saxon-resources9-3.zip: e323b3bf8ef97a33043048248bb64e071104c1dc
