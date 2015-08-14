@@ -32,7 +32,7 @@
 Summary:        Java XPath, XSLT 2.0 and XQuery implementation
 Name:           saxon
 Version:        9.3.0.4
-Release:        13.1
+Release:        13.2
 Group:          Development/Java
 # net.sf.saxon.om.XMLChar is from ASL-licensed Xerces
 # net/sf/saxon/option/jdom/ is MPLv1.1
@@ -165,10 +165,6 @@ mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 install -p -m644 %{SOURCE4} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}.1
 install -p -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_mandir}/man1/%{name}q.1
 
-# jaxp_transform_impl ghost symlink
-ln -s %{_sysconfdir}/alternatives \
-  $RPM_BUILD_ROOT%{_javadir}/jaxp_transform_impl.jar
-
 %post
 update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
   jaxp_transform_impl %{_javadir}/saxon/saxon.jar 25
@@ -182,7 +178,6 @@ update-alternatives --install %{_javadir}/jaxp_transform_impl.jar \
 %files -f .mfiles
 %doc mpl-1.0.txt mpl-1.1.txt
 %dir %{_javadir}/%{name}
-%ghost %{_javadir}/jaxp_transform_impl.jar
 
 %files manual
 %doc doc/*
