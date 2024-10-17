@@ -40,7 +40,7 @@ Group:          Development/Java
 # net/sf/saxon/expr/sort/GenericSorter.java is MIT
 # net/sf/saxon/expr/Tokenizer.java and few other bits are BSD
 License:        MPLv1.0 and MPLv1.1 and ASL 1.1 and UCD and MIT
-URL:            http://saxon.sourceforge.net/
+URL:            https://saxon.sourceforge.net/
 Source0:        https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.3/saxon9-3-0-4source.zip
 Source1:        %{name}.saxon.script
 Source2:        %{name}.saxonq.script
